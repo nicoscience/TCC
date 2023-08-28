@@ -17,14 +17,6 @@ pd.set_option('display.max_columns', None)
 # Customer DB Params #
 # ------------------ #
 
-# Quilmes (439)
-companyId = 439
-
-# userName = "rodrigo.silva@wdtl.com"
-# companyDf = pd.read_excel(r"C:/Users/Rodri/OneDrive/Documents/AoFrio/company/company_Rodrigo.xlsx") #Change directory
-userName = "nicolas.lopez@wdtl.com"
-companyDf = pd.read_excel(r"C:/Users/Servidor 1/Documents/GitHub/WDTL-Reports/company.xlsx") #Change directory
-
 company = companyDf[companyDf["companyId"] == companyId]
 
 db_url = company["endPoint"].values[0].replace('/parse/', '')
@@ -168,49 +160,6 @@ coolerlist_df["distFromInstall"] = coolerlist_df["distFromInstall"].apply(lambda
 coolerlist_df["lastTrackedBy"] = coolerlist_df["lastTrackedBy"].apply(lambda x: x["username"] if pd.notna(x) else None)
 coolerlist_df.drop(columns=["modelObj", "lastLocation"], inplace=True)
 
-def controllerType(productId): 
-        if productId == 1:
-                return "SCS Gen 1"
-        elif productId == 2:
-                return "Ice Bank"
-        elif productId == 3:
-                return "Click"
-        elif productId == 4:
-                return "SCS Controller (Basic No Display)"
-        elif productId == 6:
-                return "SCS Black"
-        elif productId == 7:
-                return "Connect Network"
-        elif productId == 16:
-                return "Monitor"
-        elif productId == 17:
-                return "Unconnected Asset"
-        else:
-                return ""
-
-coolerlist_df["productId"] = coolerlist_df["productId"].apply(lambda x: controllerType(x))
-
-def ManufactNames(oemId):
-        if oemId == "88":
-                return "Imbera"
-        elif oemId == "1":
-                return "Metalfrio" 
-        elif oemId == "2":
-                return "Criotec"
-        elif oemId == "439":
-                return "Quilmes"
-        elif oemId == "291":
-                return "Inelro"
-        elif oemId == "300":
-                return "Briket"
-        elif oemId == "81":
-                return "Mimet"
-        elif oemId == "79":
-                return "Metalfrio Brazil"
-        else:
-                return "Unkown"
-      
-coolerlist_df["oemName"] = coolerlist_df["oemId"].apply(lambda x: ManufactNames(x) if pd.notna(x) else None)
 coolerlist_df.reset_index(drop=True, inplace=True)
 # print("Number of coolers in the dataframe: " + str(coolerlist_df.shape[0]))
 
@@ -986,16 +935,3 @@ filtered_df.rename(columns={'ClassHipotesis_0_notinpivot': 'ClassHipotesis_0'}, 
 # append the filtered records to the first dataframe
 pivot_df2 = pivot_df2.append(filtered_df[['customSalesOwner', 'ClassHipotesis_0']], ignore_index=True)
 pivot_df2 = pivot_df2.merge(pivot_df.loc[:,["yearweek_assetId", "doorOpeningsPer100LitersPerDay" ,"avg_onHours", "avg_t1a_do"]], left_on='yearweek_customAssetId', right_on="yearweek_assetId", how='left')
-
-# Write to file
-output_file = "quilmes - sources.xlsx"
-# output_path = os.path.join("C:/Users/Rodri/OneDrive/Documents/AoFrio", output_file)
-output_path = os.path.join("C:/Users/Servidor 1/Documents/GitHub/WDTL-Reports/dashboardQUILMES/Output", output_file) #Change output folder
-
-with pd.ExcelWriter(output_path, engine="xlsxwriter") as writer:
-    aud.to_excel(writer, sheet_name="Devices", index=False)
-    asset_stitching_df_dummies.to_excel(writer, sheet_name="Assets", index=False)
-    coolerVisits.to_excel(writer, sheet_name="Visits", index=False)
-    pivot_df.to_excel(writer, sheet_name="HistoricalWeeklyOps", index=False)
-    pivot_df2.to_excel(writer, sheet_name="Hypotheses", index=False)
-    # current_df.to_excel(writer, sheet_name="Visitados Mês Atual",columns = output_col_dict_6.values(),index=False)
